@@ -65,7 +65,9 @@ fig1 = px.line(
 st.plotly_chart(fig1, use_container_width=True)
 
 # 인사이트 텍스트 영역
-st.info(f"💡 **이 그래프로 알 수 있는 것:** {selected_movie}의 특정 일자별 관객 수 증감 폭과 개봉 초기/주말 등의 일별 흥행 추이를 파악할 수 있습니다.")
+st.info(
+    f"💡 **이 그래프로 알 수 있는 것:** {selected_movie}의 특정 일자별 관객 수 증감 폭과 개봉 초기/주말 등의 일별 흥행 추이를 파악할 수 있습니다."
+)
 
 # 구분선 추가
 st.divider()
@@ -88,29 +90,44 @@ fig2 = px.area(
 st.plotly_chart(fig2, use_container_width=True)
 
 # 인사이트 텍스트 영역
-st.info(f"💡 **이 그래프로 알 수 있는 것:** {selected_movie}의 시간이 지남에 따른 누적 관객 수의 누적 성장세와 최종 성적 도달 속도를 볼 수 있습니다.")
+st.info(
+    f"💡 **이 그래프로 알 수 있는 것:** {selected_movie}의 시간이 지남에 따른 누적 관객 수의 누적 성장세와 최종 성적 도달 속도를 볼 수 있습니다."
+)
 
 # 구분선 추가
 st.divider()
 
 # -------------------------------------------------------------------
-# [세 번째 구역: 상위 5개 영화 누적 관객 수 비교 다중 선그래프]
+# [세 번째 구역: 20일 이상 장기 상영작 중 TOP 5 누적 관객 수 비교]
 # -------------------------------------------------------------------
-st.header("3. 상위 5개 영화 누적 관객 수 비교")
+st.header("3. 20일 이상 차트인 영화 중 TOP 5 누적 관객 수 비교")
 
-# 1. 누적 관객 수가 가장 높은 상위 5개 영화 이름 추출
-top5_movies = movie_order[:5]
+# 1. 영화별 TOP 10 진입 일수(데이터 행 수) 계산
+movie_days = df["영화명"].value_counts()
 
-# 2. 상위 5개 영화에 해당하는 데이터만 필터링
-top5_df = df[df["영화명"].isin(top5_movies)]
+# 2. 20일 이상 등장한 영화의 목록 추출
+long_running_movies = movie_days[movie_days >= 20].index.tolist()
 
-# 3. color='영화명' 속성을 사용해 범례와 함께 영화별 선 그래프 생성
+# 3. 20일 이상 등장한 영화 중에서 누적관객수 상위 5개 영화 선택
+top5_long_running = (
+    df[df["영화명"].isin(long_running_movies)]
+    .groupby("영화명")["누적관객수"]
+    .max()
+    .sort_values(ascending=False)
+    .head(5)
+    .index.tolist()
+)
+
+# 4. 상위 5개 장기 흥행 영화의 데이터만 필터링
+top5_long_df = df[df["영화명"].isin(top5_long_running)]
+
+# 5. color='영화명' 속성을 사용해 범례와 함께 다중 선그래프 생성
 fig3 = px.line(
-    top5_df,
+    top5_long_df,
     x="기준일자",
     y="누적관객수",
-    color="영화명",  # 영화별 구분 색상 및 범례 생성
-    title="누적 관객 수 상위 5개 영화 추이 비교",
+    color="영화명",  # 영화별 선 색상 및 범례 구분
+    title="20일 이상 TOP10 차트인 영화 중 누적 관객 수 TOP 5 추이 비교",
     markers=True,
 )
 
@@ -118,4 +135,6 @@ fig3 = px.line(
 st.plotly_chart(fig3, use_container_width=True)
 
 # 인사이트 텍스트 영역
-st.info("💡 **이 그래프로 알 수 있는 것:** 흥행 상위 5개 영화의 누적 관객 수 증가 곡선을 한눈에 비교하여, 대흥행작 간의 관객 수 모객 속도 차이 및 최종 흥행 스코어를 비교할 수 있습니다.")
+st.info(
+    "💡 **이 그래프로 알 수 있는 것:** 최소 20일 이상 박스오피스 TOP 10에 머물며 롱런(Long-run)한 대표 흥행작 5편의 누적 관객 수 증가 패턴과 장기 흥행 동력을 한눈에 비교할 수 있습니다."
+)
