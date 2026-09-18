@@ -61,7 +61,6 @@ try:
     
     st.plotly_chart(fig1, use_container_width=True)
     
-    # 하단 한 문장 구역
     st.info("💡 **이 그래프로 알 수 있는 것:** 국내 박스오피스 상위권에 진입한 영화들의 주요 장르 구성비와 특정 장르 편중도를 한눈에 파악할 수 있습니다.")
     
     st.divider()
@@ -80,7 +79,6 @@ try:
         title='장르별 영화 분포 및 총 관객수 (칸 크기: 총 관객수)'
     )
     
-    # 마우스 호버 시 영화명과 총 관객 표기
     fig2.update_traces(
         hovertemplate='<b>%{label}</b><br>총 관객수: %{value:,.0f}명'
     )
@@ -88,8 +86,48 @@ try:
     
     st.plotly_chart(fig2, use_container_width=True)
     
-    # 하단 한 문장 구역
     st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르 내에서 어떤 영화가 흥행을 주도했는지와 장르 전체의 관객수 점유 규모를 한눈에 비교할 수 있습니다.")
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # 3번째 그래프: 총 관객수 분포 (히스토그램)
+    # ---------------------------------------------------------
+    st.header("3. 총 관객수 분포 (히스토그램)")
+    
+    fig3 = px.histogram(
+        df,
+        x='total_audi',
+        nbins=30,
+        title='영화별 총 관객수 분포',
+        labels={'total_audi': '총 관객수(명)', 'count': '영화 편수'},
+        color_discrete_sequence=['#4C72B0']
+    )
+    
+    fig3.update_traces(
+        hovertemplate='관객수 구간: %{x}<br>영화 편수: %{y}편'
+    )
+    fig3.update_layout(
+        yaxis_title="영화 편수",
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    
+    st.plotly_chart(fig3, use_container_width=True)
+    
+    # 데이터 기반 분석 문구 계산
+    top_movie = df.loc[df['total_audi'].idxmax()]
+    top_movie_name = top_movie['movieNm']
+    top_movie_audi = top_movie['total_audi']
+    
+    # 50만 이하, 100만 이하 영화 비중 계산
+    under_100k = len(df[df['total_audi'] <= 1000000])
+    under_100k_pct = (under_100k / len(df)) * 100
+    
+    st.info(
+        f"💡 **이 그래프로 알 수 있는 것:** "
+        f"대부분의 영화가 관객수 **100만 명 이하 구간**({under_100k}편, 전체의 {under_100k_pct:.1f}%)에 밀집되어 있으며, "
+        f"가장 관객이 많은 영화는 **'{top_movie_name}'**(총 {top_movie_audi:,.0f}명)입니다."
+    )
 
     st.divider()
 
