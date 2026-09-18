@@ -34,7 +34,9 @@ def load_data():
 try:
     df = load_data()
     
-    # 구역 1: 장르별 영화 편수 (플롯리 도넛 차트)
+    # ---------------------------------------------------------
+    # 1번째 그래프: 장르별 영화 편수 (도넛 차트)
+    # ---------------------------------------------------------
     st.header("1. 장르별 영화 편수 분포")
     
     genre_counts = df['genre_first'].value_counts().reset_index()
@@ -49,6 +51,7 @@ try:
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     
+    # 마우스 호버 시 편수와 비율 표기
     fig1.update_traces(
         textposition='inside', 
         textinfo='percent+label',
@@ -58,34 +61,35 @@ try:
     
     st.plotly_chart(fig1, use_container_width=True)
     
+    # 하단 한 문장 구역
     st.info("💡 **이 그래프로 알 수 있는 것:** 국내 박스오피스 상위권에 진입한 영화들의 주요 장르 구성비와 특정 장르 편중도를 한눈에 파악할 수 있습니다.")
     
     st.divider()
 
-    # 구역 2: 개봉 첫 주 관객수 vs 총 관객수 (산점도)
-    st.header("2. 개봉 첫 주 관객수와 총 관객수의 관계")
+    # ---------------------------------------------------------
+    # 2번째 그래프: 장르 및 영화별 총 관객수 (트리맵)
+    # ---------------------------------------------------------
+    st.header("2. 장르 및 영화별 총 관객수 분포 (트리맵)")
     
-    fig2 = px.scatter(
-        df, 
-        x='first_week_audi', 
-        y='total_audi',
+    fig2 = px.treemap(
+        df,
+        path=[px.Constant("전체"), 'genre_first', 'movieNm'],
+        values='total_audi',
         color='genre_first',
-        size='first_scrn',
-        hover_name='movieNm',
-        hover_data={'days_in_top10': True, 'first_week_audi': ':,', 'total_audi': ':,'},
-        labels={
-            'first_week_audi': '개봉 첫 주 관객수', 
-            'total_audi': '총 관객수', 
-            'genre_first': '장르',
-            'first_scrn': '첫 날 스크린수'
-        },
-        title='개봉 첫 주 관객수 대비 총 관객수 (점 크기: 개봉일 스크린수)'
+        color_discrete_sequence=px.colors.qualitative.Set3,
+        title='장르별 영화 분포 및 총 관객수 (칸 크기: 총 관객수)'
+    )
+    
+    # 마우스 호버 시 영화명과 총 관객 표기
+    fig2.update_traces(
+        hovertemplate='<b>%{label}</b><br>총 관객수: %{value:,.0f}명'
     )
     fig2.update_layout(margin=dict(t=50, b=20, l=20, r=20))
     
     st.plotly_chart(fig2, use_container_width=True)
     
-    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많은 영화일수록 최종 총 관객수도 높게 형성되는 강한 양의 상관관계를 보여줍니다.")
+    # 하단 한 문장 구역
+    st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르 내에서 어떤 영화가 흥행을 주도했는지와 장르 전체의 관객수 점유 규모를 한눈에 비교할 수 있습니다.")
 
     st.divider()
 
