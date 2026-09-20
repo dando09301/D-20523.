@@ -29,6 +29,10 @@ def load_data():
     else:
         df['genre_first'] = '미상'
         
+    # 제작 국가 결측치 처리
+    if 'nation' in df.columns:
+        df['nation'] = df['nation'].fillna('기타/미상')
+        
     return df
 
 try:
@@ -113,7 +117,6 @@ try:
     
     st.plotly_chart(fig3, use_container_width=True)
     
-    # 데이터 기반 분석 문구 계산
     top_movie = df.loc[df['total_audi'].idxmax()]
     top_movie_name = top_movie['movieNm']
     top_movie_audi = top_movie['total_audi']
@@ -202,7 +205,7 @@ try:
     st.divider()
 
     # ---------------------------------------------------------
-    # 6번째 그래프: 개봉일 스크린수 vs 총 관객수 (버블 차트 - 점 크기: 개봉 첫 주 관객수)
+    # 6번째 그래프: 개봉일 스크린수 vs 총 관객수 (버블 차트)
     # ---------------------------------------------------------
     st.header("6. 개봉일 스크린수, 총 관객수 및 첫 주 관객수의 관계 (버블 차트)")
     
@@ -238,6 +241,34 @@ try:
     st.plotly_chart(fig6, use_container_width=True)
     
     st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많을수록 개봉 첫 주 관객수(점 크기)가 크고, 이것이 결국 높은 최종 관객수로 연결되는 입체적인 상관관계를 한눈에 확인할 수 있습니다.")
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # 7번째 그래프: 제작 국가 -> 장르 계층 구조 (선버스트 차트)
+    # ---------------------------------------------------------
+    st.header("7. 제작 국가 및 장르별 영화 편수 구조 (선버스트)")
+    
+    # 국가 -> 장르 계층별 영화 편수 집계
+    nation_genre_df = df.groupby(['nation', 'genre_first']).size().reset_index(name='movie_count')
+    
+    fig7 = px.sunburst(
+        nation_genre_df,
+        path=['nation', 'genre_first'],
+        values='movie_count',
+        color='nation',
+        title='제작 국가 및 장르별 영화 편수 (선버스트 차트)',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    
+    fig7.update_traces(
+        hovertemplate='<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}'
+    )
+    fig7.update_layout(margin=dict(t=50, b=20, l=20, r=20))
+    
+    st.plotly_chart(fig7, use_container_width=True)
+    
+    st.info("💡 **이 그래프로 알 수 있는 것:** 각 제작 국가별로 어떤 장르의 영화가 주로 개봉했는지 계층 구조와 비율을 계층적으로 파악할 수 있습니다.")
 
     st.divider()
 
