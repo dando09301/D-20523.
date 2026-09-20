@@ -162,6 +162,46 @@ try:
 
     st.divider()
 
+    # ---------------------------------------------------------
+    # 5번째 그래프: 주요 장르별 총 관객수 분포 (박스플롯)
+    # ---------------------------------------------------------
+    st.header("5. 주요 장르별 총 관객수 분포 (상자 그림)")
+    
+    # 영화가 10편 이상인 장르만 필터링
+    genre_counts_series = df['genre_first'].value_counts()
+    major_genres = genre_counts_series[genre_counts_series >= 10].index.tolist()
+    df_filtered = df[df['genre_first'].isin(major_genres)]
+    
+    fig5 = px.box(
+        df_filtered,
+        x='genre_first',
+        y='total_audi',
+        color='genre_first',
+        points='outliers',  # 상자 밖의 이상치(점) 표시
+        hover_name='movieNm',
+        hover_data={'total_audi': ':,'},
+        labels={
+            'genre_first': '장르',
+            'total_audi': '총 관객수(명)'
+        },
+        title='영화 수 10편 이상인 주요 장르별 총 관객수 분포 (박스플롯)',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    
+    fig5.update_traces(
+        hovertemplate='<b>%{hovertext}</b><br>총 관객수: %{y:,.0f}명'
+    )
+    fig5.update_layout(
+        showlegend=False,
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    st.info("💡 **이 그래프로 알 수 있는 것:** 편수가 10편 이상인 주요 장르별 관객수의 중앙값 및 범위를 비교할 수 있으며, 박스 밖의 이상치 점을 통해 해당 장르의 메가 히트작을 확인할 수 있습니다.")
+
+    st.divider()
+
     # 원본 데이터 확인용 Expander
     with st.expander("📄 Raw Data 보기"):
         st.dataframe(df)
