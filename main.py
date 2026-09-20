@@ -167,7 +167,6 @@ try:
     # ---------------------------------------------------------
     st.header("5. 주요 장르별 총 관객수 분포 (상자 그림)")
     
-    # 영화가 10편 이상인 장르만 필터링
     genre_counts_series = df['genre_first'].value_counts()
     major_genres = genre_counts_series[genre_counts_series >= 10].index.tolist()
     df_filtered = df[df['genre_first'].isin(major_genres)]
@@ -177,7 +176,7 @@ try:
         x='genre_first',
         y='total_audi',
         color='genre_first',
-        points='outliers',  # 상자 밖의 이상치(점) 표시
+        points='outliers',
         hover_name='movieNm',
         hover_data={'total_audi': ':,'},
         labels={
@@ -199,6 +198,46 @@ try:
     st.plotly_chart(fig5, use_container_width=True)
     
     st.info("💡 **이 그래프로 알 수 있는 것:** 편수가 10편 이상인 주요 장르별 관객수의 중앙값 및 범위를 비교할 수 있으며, 박스 밖의 이상치 점을 통해 해당 장르의 메가 히트작을 확인할 수 있습니다.")
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # 6번째 그래프: 개봉일 스크린수 vs 총 관객수 (버블 차트 - 점 크기: 개봉 첫 주 관객수)
+    # ---------------------------------------------------------
+    st.header("6. 개봉일 스크린수, 총 관객수 및 첫 주 관객수의 관계 (버블 차트)")
+    
+    fig6 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        size='first_week_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        hover_data={
+            'first_scrn': ':,',
+            'total_audi': ':,',
+            'first_week_audi': ':,',
+            'genre_first': True
+        },
+        labels={
+            'first_scrn': '개봉일 스크린수',
+            'total_audi': '총 관객수(명)',
+            'first_week_audi': '개봉 첫 주 관객수(명)',
+            'genre_first': '장르'
+        },
+        title='개봉일 스크린수 대비 총 관객수 (점 크기: 개봉 첫 주 관객수)',
+        color_discrete_sequence=px.colors.qualitative.Set3,
+        size_max=40
+    )
+    
+    fig6.update_traces(
+        hovertemplate='<b>%{hovertext}</b><br>장르: %{customdata[3]}<br>개봉일 스크린수: %{x:,.0f}개<br>개봉 첫 주 관객수: %{customdata[2]:,.0f}명<br>총 관객수: %{y:,.0f}명'
+    )
+    fig6.update_layout(margin=dict(t=50, b=20, l=20, r=20))
+    
+    st.plotly_chart(fig6, use_container_width=True)
+    
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많을수록 개봉 첫 주 관객수(점 크기)가 크고, 이것이 결국 높은 최종 관객수로 연결되는 입체적인 상관관계를 한눈에 확인할 수 있습니다.")
 
     st.divider()
 
