@@ -51,7 +51,6 @@ try:
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     
-    # 마우스 호버 시 편수와 비율 표기
     fig1.update_traces(
         textposition='inside', 
         textinfo='percent+label',
@@ -119,7 +118,6 @@ try:
     top_movie_name = top_movie['movieNm']
     top_movie_audi = top_movie['total_audi']
     
-    # 50만 이하, 100만 이하 영화 비중 계산
     under_100k = len(df[df['total_audi'] <= 1000000])
     under_100k_pct = (under_100k / len(df)) * 100
     
@@ -128,6 +126,39 @@ try:
         f"대부분의 영화가 관객수 **100만 명 이하 구간**({under_100k}편, 전체의 {under_100k_pct:.1f}%)에 밀집되어 있으며, "
         f"가장 관객이 많은 영화는 **'{top_movie_name}'**(총 {top_movie_audi:,.0f}명)입니다."
     )
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # 4번째 그래프: 개봉일 스크린수 vs 총 관객수 (산점도)
+    # ---------------------------------------------------------
+    st.header("4. 개봉일 스크린수와 총 관객수의 관계")
+    
+    fig4 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        hover_data={'first_scrn': ':,', 'total_audi': ':,', 'genre_first': True},
+        labels={
+            'first_scrn': '개봉일 스크린수',
+            'total_audi': '총 관객수(명)',
+            'genre_first': '장르'
+        },
+        title='개봉일 스크린수 대비 총 관객수 (장르별 구분)',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    
+    fig4.update_traces(
+        marker=dict(size=9, opacity=0.8),
+        hovertemplate='<b>%{hovertext}</b><br>장르: %{customdata[2]}<br>개봉일 스크린수: %{x:,.0f}개<br>총 관객수: %{y:,.0f}명'
+    )
+    fig4.update_layout(margin=dict(t=50, b=20, l=20, r=20))
+    
+    st.plotly_chart(fig4, use_container_width=True)
+    
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많이 확보된 영화일수록 초기 인지도와 상영 기회를 바탕으로 더 높은 총 관객수를 기록하는 양의 상관관계를 나타냅니다.")
 
     st.divider()
 
