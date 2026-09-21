@@ -249,7 +249,6 @@ try:
     # ---------------------------------------------------------
     st.header("7. 제작 국가 및 장르별 영화 편수 구조 (선버스트)")
     
-    # 국가 -> 장르 계층별 영화 편수 집계
     nation_genre_df = df.groupby(['nation', 'genre_first']).size().reset_index(name='movie_count')
     
     fig7 = px.sunburst(
@@ -269,6 +268,43 @@ try:
     st.plotly_chart(fig7, use_container_width=True)
     
     st.info("💡 **이 그래프로 알 수 있는 것:** 각 제작 국가별로 어떤 장르의 영화가 주로 개봉했는지 계층 구조와 비율을 계층적으로 파악할 수 있습니다.")
+
+    st.divider()
+
+    # ---------------------------------------------------------
+    # 8번째 그래프: 10권에 머문 영화들은 관객도가 유지되는가 (산점도)
+    # ---------------------------------------------------------
+    st.header("8. 10권에 머문 영화들은 관객도가 유지되는가")
+    
+    fig8 = px.scatter(
+        df,
+        x='days_in_top10',
+        y='total_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        hover_data={
+            'days_in_top10': True,
+            'total_audi': ':,',
+            'genre_first': True
+        },
+        labels={
+            'days_in_top10': '10위권에 머문 날수(일)',
+            'total_audi': '총 관객수(명)',
+            'genre_first': '장르'
+        },
+        title='10권에 머문 영화들은 관객도가 유지되는가',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    
+    fig8.update_traces(
+        marker=dict(size=9, opacity=0.8),
+        hovertemplate='<b>%{hovertext}</b><br>장르: %{customdata[2]}<br>10위권 체류 날수: %{x}일<br>총 관객수: %{y:,.0f}명'
+    )
+    fig8.update_layout(margin=dict(t=50, b=20, l=20, r=20))
+    
+    st.plotly_chart(fig8, use_container_width=True)
+    
+    st.info("💡 **이 그래프로 알 수 있는 것:** 10위권에 오래 머문 영화일수록 총 관객수가 우상향하며, 체류 기간이 관객 유입력 및 흥행 유지도와 강한 비례 관계를 형성함을 알 수 있습니다.")
 
     st.divider()
 
